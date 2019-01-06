@@ -1,7 +1,10 @@
 //! Errors used in the Bip-Buffer implementation
 
-use std::error;
-use std::fmt;
+#[cfg(feature = "std")]
+use std::{error, fmt};
+
+#[cfg(not(feature = "std"))]
+use core::fmt;
 
 /// The error type
 #[derive(Clone, Copy, Debug)]
@@ -38,6 +41,7 @@ impl fmt::Display for Error {
     }
 }
 
+#[cfg(feature = "std")]
 impl error::Error for Error {
     fn description(&self) -> &str {
         self.kind.as_str()

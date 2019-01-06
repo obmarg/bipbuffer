@@ -10,6 +10,10 @@ categories = ["data-structures"]
 license = "Apache-2.0"
 repository = "https://github.com/squidpickles/bipbuffer.git"
 
+[features]
+default = ['std']
+std = []
+
 [dependencies]
 
 [badges]

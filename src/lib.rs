@@ -1,5 +1,5 @@
 #![deny(missing_docs, missing_debug_implementations, missing_copy_implementations, trivial_casts,
-trivial_numeric_casts, unsafe_code, unstable_features, unused_import_braces, unused_qualifications)]
+trivial_numeric_casts, unsafe_code, unused_import_braces, unused_qualifications)]
 //! # Bip-Buffer
 //! A Rust implementation of Simon Cooke's [Bip-Buffer][1]
 //!
@@ -44,10 +44,24 @@ trivial_numeric_casts, unsafe_code, unstable_features, unused_import_braces, unu
 //! }
 //! ```
 //! [1]: https://www.codeproject.com/articles/3479/the-bip-buffer-the-circular-buffer-with-a-twist
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(not(feature = "std"), feature(alloc))]
+
 mod error;
 
 pub use error::{Error, ErrorKind};
-use std::default::Default;
+
+#[cfg(feature = "std")]
+use std::{default::Default, cmp};
+
+#[cfg(not(feature ="std"))]
+use core::{default::Default, cmp};
+
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 
 /// A Bip-Buffer object
 #[derive(Debug)]
@@ -120,7 +134,7 @@ impl<T: Default> BipBuffer<T> {
         if free_space == 0 {
             return Err(ErrorKind::NoSpace.into());
         }
-        let reserve_length = std::cmp::min(free_space, length);
+        let reserve_length = cmp::min(free_space, length);
         self.reserve_start = reserve_start;
         self.reserve_end = reserve_start + reserve_length;
         Ok(&mut self.buffer[self.reserve_start..self.reserve_end])
@@ -136,7 +150,7 @@ impl<T: Default> BipBuffer<T> {
             self.reserve_end = 0;
             return;
         }
-        let to_commit = std::cmp::min(length, self.reserve_end - self.reserve_start);
+        let to_commit = cmp::min(length, self.reserve_end - self.reserve_start);
         if self.a_end - self.a_start == 0 && self.b_end - self.b_start == 0 {
             self.a_start = self.reserve_start;
             self.a_end = self.reserve_start + to_commit;
